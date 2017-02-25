@@ -19,7 +19,10 @@
    :only
    #{#'conf/config
      #'web-server/http-server
-     #'topics/connector}
+     #'topics/producer
+     #'topics/data-topic-consumer
+     #'topics/reciepts-topic-consumer
+     #'topics/proof-topic-consumer}
 
    :config
    {:environment :dev

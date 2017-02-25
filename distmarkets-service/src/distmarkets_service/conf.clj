@@ -51,25 +51,37 @@
   []
   (get-in config [:environment]))
 
-(defn kafka-cfg
+(defn kafka-bootstrap-servers
   "The platform environment"
   []
-  (get-in config [:kafka]))
+  (get-in config [:kafka :bootstrap-servers]))
 
-(defn data-topic
+(defn data-topic-name
   "Topic name that holds the data."
   []
-  (get-in config [:data-topic]))
+  (get-in config [:data-topic :name]))
 
-(defn reciepts-topic
+(defn data-topic-consumer-group
+  []
+  (get-in config [:data-topic :consumer-group]))
+
+(defn reciepts-topic-name
   "Topic that holds the reciepts."
   []
-  (get-in config [:reciepts-topic]))
+  (get-in config [:reciepts-topic :name]))
 
-(defn proof-topic
+(defn reciepts-topic-consumer-group
+  []
+  (get-in config [:reciepts-topic :consumer-group]))
+
+(defn proof-topic-name
   "Topic that holds the proofs."
   []
-  (get-in config [:proof-topic]))
+  (get-in config [:proof-topic :name]))
+
+(defn proof-topic-consumer-group
+  []
+  (get-in config [:proof-topic :consumer-group]))
 
 (defn topic-create-opts
   "The default topic creation options"
@@ -80,6 +92,10 @@
   "The default topic producer options"
   []
   (get-in config [:topics :producer.opts]))
+
+(defn redis-host
+  []
+  (get-in config [:redis :host]))
 
 #_(defn conflux-producer-opts
     "Default options for kafka Producer"
