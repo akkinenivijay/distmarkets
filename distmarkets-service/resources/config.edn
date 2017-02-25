@@ -9,12 +9,15 @@
             :worker-name-prefix "distmarkets-service"
             :thread             4}
 
- :kafka {:host #profile {:default "localhost"}
-         :port #profile {:default  9092}}
+ :kafka
+ {:bootstrap-servers #profile {:default [{:host "localhost" :port 9092}]}}
  
  :data-topic
- #profile
- {:default "data-topic"}
+ {:name           #profile {:default "data-topic"}
+  :consumer-group #profile {:default "data-topic-group"}}
+
+ :redis
+ {:host #profile {:default "localhost"}}
 
  :reciepts-topic
  #profile

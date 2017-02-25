@@ -8,7 +8,7 @@
 
 (defn capture-data
   [ctx] 
-  (topics/put "data-topic" (.getBytes (cheshire-core/generate-string (:body ctx))))
+  (topics/put "data-topic" (cheshire-core/generate-string (:body ctx)))
   {:status :success})
 
 (defn data-resource

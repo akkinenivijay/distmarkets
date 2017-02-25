@@ -51,15 +51,19 @@
   []
   (get-in config [:environment]))
 
-(defn kafka-cfg
+(defn kafka-bootstrap-servers
   "The platform environment"
   []
-  (get-in config [:kafka]))
+  (get-in config [:kafka :bootstrap-servers]))
 
-(defn data-topic
+(defn data-topic-name
   "Topic name that holds the data."
   []
-  (get-in config [:data-topic]))
+  (get-in config [:data-topic :name]))
+
+(defn data-topic-consumer-group
+  []
+  (get-in config [:data-topic :consumer-group]))
 
 (defn reciepts-topic
   "Topic that holds the reciepts."
@@ -80,6 +84,10 @@
   "The default topic producer options"
   []
   (get-in config [:topics :producer.opts]))
+
+(defn redis-host
+  []
+  (get-in config [:redis :host]))
 
 #_(defn conflux-producer-opts
     "Default options for kafka Producer"
