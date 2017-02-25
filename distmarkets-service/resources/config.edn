@@ -1,0 +1,25 @@
+;;; Configuration is a nested map of keys-values. We use the Aero library to
+;;; allow for multi-environment config from a single file. The idea is that all
+;;; configuration should be easily understood from a single location. The values
+;;; below represent the defaults of the system and can be overriden at runtime
+;;; based on CLI args
+
+{:http-kit {:port               #profile {:default 8080}
+            :ip                 "0.0.0.0"
+            :worker-name-prefix "distmarkets-service"
+            :thread             4}
+
+ :kafka {:host #profile {:default "localhost"}
+         :port #profile {:default  9092}}
+ 
+ :data-topic
+ #profile
+ {:default "data-topic"}
+
+ :reciepts-topic
+ #profile
+ {:default "reciepts-topic"}
+
+ :proof-topic
+ #profile
+ {:default "proof-topic"}}
