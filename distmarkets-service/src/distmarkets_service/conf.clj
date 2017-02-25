@@ -65,15 +65,23 @@
   []
   (get-in config [:data-topic :consumer-group]))
 
-(defn reciepts-topic
+(defn reciepts-topic-name
   "Topic that holds the reciepts."
   []
-  (get-in config [:reciepts-topic]))
+  (get-in config [:reciepts-topic :name]))
 
-(defn proof-topic
+(defn reciepts-topic-consumer-group
+  []
+  (get-in config [:reciepts-topic :consumer-group]))
+
+(defn proof-topic-name
   "Topic that holds the proofs."
   []
-  (get-in config [:proof-topic]))
+  (get-in config [:proof-topic :name]))
+
+(defn proof-topic-consumer-group
+  []
+  (get-in config [:proof-topic :consumer-group]))
 
 (defn topic-create-opts
   "The default topic creation options"

@@ -10,7 +10,7 @@
             :thread             4}
 
  :kafka
- {:bootstrap-servers #profile {:default [{:host "localhost" :port 9092}]}}
+ {:bootstrap-servers #profile {:default ["127.0.0.1:9092"]}}
  
  :data-topic
  {:name           #profile {:default "data-topic"}
@@ -20,9 +20,9 @@
  {:host #profile {:default "localhost"}}
 
  :reciepts-topic
- #profile
- {:default "reciepts-topic"}
+ {:name           #profile {:default "reciepts-topic"}
+  :consumer-group #profile {:default "reciepts-topic-group"}}
 
  :proof-topic
- #profile
- {:default "proof-topic"}}
+ {:name           #profile {:default "proof-topic"}
+  :consumer-group #profile {:default "proof-topic-group"}}}
