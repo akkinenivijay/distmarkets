@@ -6,7 +6,6 @@ import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.sql.Timestamp;
-import java.util.Calendar;
 import java.util.Random;
 
 public class DataProducer {
