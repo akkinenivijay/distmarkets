@@ -9,6 +9,7 @@
             [aero.core :as aero]
             [distmarkets-service.conf :as conf]
             [distmarkets-service.api-routes :as api-routes]
+            [distmarkets-service.web-server :as web-server]
             [distmarkets-service.redis :as redis]
             [distmarkets-service.tierion :as tierion]
             [distmarkets-service.topics :as topics])

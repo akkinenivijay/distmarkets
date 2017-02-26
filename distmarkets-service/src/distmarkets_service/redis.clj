@@ -3,9 +3,11 @@
             [distmarkets-service.conf :as conf]
             [cheshire.core :as cheshire-core]))
 
-(def redis-conn {:pool {} :spec {:host (conf/redis-host) :port 6379}})
+(defn redis-conn
+  []
+  {:pool {} :spec {:host (conf/redis-host) :port 6379}})
 
-(defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
+(defmacro wcar* [& body] `(car/wcar (redis-conn) ~@body))
 
 (defn set-inspectionid
   [id]
