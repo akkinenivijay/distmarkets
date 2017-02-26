@@ -1,8 +1,9 @@
 (ns distmarkets-service.redis
   (:require [taoensso.carmine :as car :refer (wcar)]
+            [distmarkets-service.conf :as conf]
             [cheshire.core :as cheshire-core]))
 
-(def redis-conn {:pool {} :spec {:host "127.0.0.1" :port 6379}})
+(def redis-conn {:pool {} :spec {:host (conf/redis-host) :port 6379}})
 
 (defmacro wcar* [& body] `(car/wcar redis-conn ~@body))
 

@@ -29,7 +29,7 @@
                  [com.taoensso/timbre "4.8.0"]]
   :plugins [[lein-cljfmt "0.5.6"]
             [lein-ancient "0.6.10"]]
-  :main ^:skip-aot distmarkets-service.core
+  :main distmarkets-service.core
   :target-path "target/%s"
   :profiles {:uberjar {:aot :all}
              

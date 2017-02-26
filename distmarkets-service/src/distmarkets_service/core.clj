@@ -4,6 +4,7 @@
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
             [clojure.core.async :refer [<!! chan]]
+            [taoensso.timbre :as timbre]
             [mount.core :as mount]
             [aero.core :as aero]
             [distmarkets-service.conf :as conf]
@@ -52,7 +53,7 @@
    ["-e" "--environment ENV" "Envrionment to run in."
     :default :dev
     :parse-fn #(-> % lower-case keyword)
-    :validate [#(some #{%} [:aws])
+    :validate [#(some #{%} [:aws :dev])
                "Should be aws for prod"]]
    ;; A boolean option defaulting to nil
    ["-h" "--help"]])
