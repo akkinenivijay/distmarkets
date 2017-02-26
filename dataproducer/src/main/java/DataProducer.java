@@ -30,7 +30,7 @@ public class DataProducer {
                 sendPostRequest(requestUrl, objstr);
                 System.out.println(objstr);
                 Random r = new Random();
-                int Low = 1;
+                int Low = 2000;
                 int High = 7500;
                 int Result = r.nextInt(High-Low) + Low;
 
