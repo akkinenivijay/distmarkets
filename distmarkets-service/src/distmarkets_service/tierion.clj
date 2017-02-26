@@ -44,6 +44,9 @@
      {:status :not-ready})
    (catch [:status 404] {:keys [request-time headers body]}
      (log/warn "404" request-time headers)
+     {:status :not-ready})
+   (catch Object _
+     (log/error (:throwable &throw-context) "unexpected error")
      {:status :not-ready})))
 
 (defn retry-get-proof-indefinitely
