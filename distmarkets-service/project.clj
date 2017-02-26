@@ -15,11 +15,14 @@
                  [aero "1.1.2"]
                  [aleph "0.4.2-alpha12"]
                  [digest "1.4.5"]
+                 [while-let "0.2.0"]
                  [bidi "2.0.16"]
                  [yada "1.2.0"
                   :exclusions [ring-swagger
                                com.fasterxml.jackson.core/jackson-databind]]
+                 [com.taoensso/carmine "2.15.1"]
                  [metosin/ring-swagger "0.22.12"]
+                 [com.taoensso/encore "2.89.0"]
                  [ymilky/franzy "0.0.1"]
                  [org.apache.kafka/kafka-clients "0.10.2.0"]
                  [kafka-clj "4.0.0"]
