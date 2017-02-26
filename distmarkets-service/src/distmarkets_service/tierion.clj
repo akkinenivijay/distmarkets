@@ -15,9 +15,9 @@
   []
   (let [response (try
                    (client/post "https://hashapi.tierion.com/v1/auth/token"
-                                {:body         (cheshire-core/generate-string auth-data-map)
-                                 :content-type :json
-                                 :accept       :json})
+                            {:body         (cheshire-core/generate-string auth-data-map)
+                             :content-type :json
+                             :accept       :json})
                    (catch Exception e {}))]
     (:access_token (cheshire-core/parse-string (:body response) true))))
 
@@ -53,9 +53,6 @@
   [receiptid dataid]
   (let [respone (get-receipt receiptid)]
     (if (= (:status respone) :not-ready)
-      (do @(future (Thread/sleep 10000) (println (format "processing receiptid:  %s dataid: %s" receiptid dataid))
+      (do @(future (Thread/sleep 30000) (println "procesing receiptid & dataid: " receiptid dataid))
           (retry-get-proof-indefinitely receiptid dataid))
       {:INSPECTION_ID dataid :receiptId receiptid :final-proof (cheshire-core/parse-string (:receipt respone) true)})))
-
-
-
