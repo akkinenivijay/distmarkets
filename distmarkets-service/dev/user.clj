@@ -7,6 +7,7 @@
             [mount.core :as mount]
             [distmarkets-service.conf :as conf]
             [distmarkets-service.topics :as topics]
+            [distmarkets-service.tierion :as tierion]
             [distmarkets-service.web-server :as web-server]
             [taoensso.timbre :as timbre]))
 
@@ -22,7 +23,8 @@
      #'topics/producer
      #'topics/data-topic-consumer
      #'topics/reciepts-topic-consumer
-     #'topics/proof-topic-consumer}
+     #'topics/proof-topic-consumer
+     #'tierion/authtoken}
 
    :config
    {:environment :dev

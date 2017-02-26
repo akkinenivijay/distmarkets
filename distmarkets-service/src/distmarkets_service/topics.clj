@@ -4,6 +4,7 @@
             [franzy.clients.producer.defaults :as pd]
             [franzy.clients.producer.protocols :refer :all]
             [franzy.clients.consumer.client :as client]
+            [cheshire.core :as cheshire-core]
             [franzy.clients.consumer.protocols :as consumer-protocols]
             [franzy.clients.consumer.callbacks :as consumer-callbacks]
             [franzy.clients.consumer.defaults :as consumer-defaults]
@@ -11,11 +12,32 @@
             [franzy.serialization.deserializers :as deserializers]
             [clojure.core.async :as async :refer [thread]] 
             [distmarkets-service.conf :as conf]
+            [distmarkets-service.tierion :as tierion]
             [mount.core :as mount :refer [defstate]])
   (:import [franzy.clients.producer.client FranzProducer]
            [franzy.clients.consumer.client FranzConsumer]
            (org.apache.kafka.common.errors WakeupException)
            (java.util.concurrent TimeUnit)))
+
+(defstate producer
+  :start (let [pc               {:bootstrap.servers ["127.0.0.1:9092"]
+                                 :acks              "all"
+                                 :retries           0
+                                 :batch.size        16384
+                                 :linger.ms         10
+                                 :buffer.memory     33554432}
+               key-serializer   (serializers/string-serializer)
+               value-serializer (serializers/string-serializer)
+               options          (pd/make-default-producer-options)]
+           (producer/make-producer pc key-serializer value-serializer options))
+  :stop (.close producer))
+
+(defn uuid [] (str (java.util.UUID/randomUUID)))
+
+(defn put
+  [topic message]
+  (let [send-fut (send-async! producer {:topic topic :key (uuid) :value message})]
+    (println "Async send results:" @send-fut)))
 
 (defn create-offset-commit-callback
   "Creates an offset commit callback"
@@ -121,11 +143,20 @@
             (consumer-protocols/clear-subscriptions! c)))))
     consumer))
 
+(defn process-data
+  [msg]
+  (let [value               (:value msg)
+        value-map           (cheshire-core/parse-string value true)
+        receipt-data        (tierion/submit-hashitem value)
+        receipts-topic-data {:INSPECTION_ID (:INSPECTION_ID value-map)
+                             :receiptId     (:receiptId receipt-data)}]
+    (log/info "Data that goes to receipt topic: " receipts-topic-data)
+    (put "reciepts-topic" (cheshire-core/generate-string receipts-topic-data))))
+
 (defstate data-topic-consumer
   :start
   (start-consumer (conf/data-topic-name)
-                  (fn [msg]
-                    (log/info "Processing data!!!" msg)))
+                  process-data)
   :stop
   (.close data-topic-consumer))
 
@@ -144,23 +175,3 @@
                     (log/info "Processing Proofs!!!" msg)))
   :stop
   (.close proof-topic-consumer))
-
-(defstate producer
-  :start (let [pc               {:bootstrap.servers ["127.0.0.1:9092"]
-                                 :acks              "all"
-                                 :retries           0
-                                 :batch.size        16384
-                                 :linger.ms         10
-                                 :buffer.memory     33554432}
-               key-serializer   (serializers/string-serializer)
-               value-serializer (serializers/string-serializer)
-               options          (pd/make-default-producer-options)]
-           (producer/make-producer pc key-serializer value-serializer options))
-  :stop (.close producer))
-
-(defn uuid [] (str (java.util.UUID/randomUUID)))
-
-(defn put
-  [topic message]
-  (let [send-fut (send-async! producer {:topic topic :key (uuid) :value message})]
-    (println "Async send results:" @send-fut)))
