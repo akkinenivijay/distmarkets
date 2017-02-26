@@ -2,7 +2,10 @@
   (:require [clj-http.client :as client]
             [cheshire.core :as cheshire-core]
             [digest :as digest]
-            [mount.core :as mount :refer [defstate]]))
+            [mount.core :as mount :refer [defstate]]
+            [taoensso.timbre :as log])
+  (:use [slingshot.slingshot :only [throw+ try+]]
+        [while-let.core :refer [while-let]]))
 
 (def auth-data-map
   {:username "mtidwell021@gmail.com"
@@ -30,7 +33,23 @@
                                :accept       :json})]
     (cheshire-core/parse-string (:body response) true)))
 
-;;(submit-hashitem (cheshire-core/generate-string testdata))
+(defn get-receipt
+  [receiptid]
+  (try+
+   (cheshire-core/parse-string (:body (client/get (str "https://hashapi.tierion.com/v1/receipts/" receiptid)
+                                                  {:headers {"Authorization" (str "Bearer " authtoken)}
+                                                   :accept  :json})) true)
+   (catch [:status 409] {:keys [request-time headers body]}
+     (log/warn "409" request-time headers)
+     {:status :not-ready})))
+
+(defn retry-get-proof-indefinitely
+  [receiptid dataid]
+  (let [respone (get-receipt receiptid)]
+    (if (= (:status respone) :not-ready)
+      (do @(future (Thread/sleep 10000) (println "done sleeping"))
+          (retry-get-proof-indefinitely receiptid dataid))
+      {:INSPECTION_ID dataid :receiptId receiptid :final-proof (cheshire-core/parse-string (:receipt respone) true)})))
 
 
 

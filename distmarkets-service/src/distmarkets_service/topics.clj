@@ -125,6 +125,11 @@
           (hash-map)
           messages))
 
+(defn process-messages-with-offset
+  [message func]
+  (process-message message func)
+  (topic-partition-offset message))
+
 (defn start-consumer
   [topic func]
   (let [consumer (create-consumer topic)]
@@ -133,11 +138,9 @@
         (try
           (consumer-protocols/subscribe-to-partitions! c [topic])
           (while true
-            (let [cr          (consumer-protocols/poll! c)
-                  msg-batches (partition-all 10 cr)]
-              (doseq [msg-batch msg-batches :when (seq msg-batch)]
-                (let [offsets (process-messages-with-offsets msg-batch func)]
-                  (consumer-protocols/commit-offsets-async! c offsets)))))
+            (doseq [msg (consumer-protocols/poll! c)]
+              (let [offset (process-messages-with-offset msg func)]
+                (consumer-protocols/commit-offsets-async! c offset))))
           (catch WakeupException we
             (consumer-protocols/commit-offsets-sync! c)
             (consumer-protocols/clear-subscriptions! c)))))
@@ -160,11 +163,18 @@
   :stop
   (.close data-topic-consumer))
 
+(defn process-receipts
+  [msg]
+  (let [value      (:value msg)
+        value-map  (cheshire-core/parse-string value true)
+        proof-data (tierion/retry-get-proof-indefinitely (:receiptId value-map) (:INSPECTION_ID value-map))]
+    (log/info "Data that goes to proof  topic: " proof-data)
+    (put "proof-topic" (cheshire-core/generate-string proof-data))))
+
 (defstate reciepts-topic-consumer
   :start
   (start-consumer (conf/reciepts-topic-name)
-                  (fn [msg]
-                    (log/info "Processing Reciepts!!!" msg)))
+                  process-receipts)
   :stop
   (.close reciepts-topic-consumer))
 

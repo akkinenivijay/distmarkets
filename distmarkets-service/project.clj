@@ -15,6 +15,7 @@
                  [aero "1.1.2"]
                  [aleph "0.4.2-alpha12"]
                  [digest "1.4.5"]
+                 [while-let "0.2.0"]
                  [bidi "2.0.16"]
                  [yada "1.2.0"
                   :exclusions [ring-swagger
