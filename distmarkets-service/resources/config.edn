@@ -11,14 +11,15 @@
 
  :kafka
  {:bootstrap-servers #profile {:default ["127.0.0.1:9092"]
-                               :aws     ["107.23.205.118:9092" "54.87.138.212:9092" "54.164.58.194:9092"]}}
+                               :aws     ["172.31.30.76:9092" "172.31.25.40:9092" "172.31.31.17:9092"]}}
  
  :data-topic
  {:name           #profile {:default "data-topic"}
   :consumer-group #profile {:default "data-topic-group"}}
 
  :redis
- {:host #profile {:default "localhost"}}
+ {:host #profile {:default "localhost"
+                  :aws     "172.31.53.209"}}
 
  :reciepts-topic
  {:name           #profile {:default "reciepts-topic"}
