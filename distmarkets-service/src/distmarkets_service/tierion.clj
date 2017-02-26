@@ -41,6 +41,9 @@
                                                    :accept  :json})) true)
    (catch [:status 409] {:keys [request-time headers body]}
      (log/warn "409" request-time headers)
+     {:status :not-ready})
+   (catch [:status 404] {:keys [request-time headers body]}
+     (log/warn "404" request-time headers)
      {:status :not-ready})))
 
 (defn retry-get-proof-indefinitely
