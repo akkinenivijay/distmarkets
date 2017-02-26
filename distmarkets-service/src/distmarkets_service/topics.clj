@@ -12,6 +12,7 @@
             [franzy.serialization.deserializers :as deserializers]
             [clojure.core.async :as async :refer [thread]] 
             [distmarkets-service.conf :as conf]
+            [distmarkets-service.redis :as redis]
             [distmarkets-service.tierion :as tierion]
             [mount.core :as mount :refer [defstate]])
   (:import [franzy.clients.producer.client FranzProducer]
@@ -125,6 +126,11 @@
           (hash-map)
           messages))
 
+(defn process-messages-with-offset
+  [message func]
+  (process-message message func)
+  (topic-partition-offset message))
+
 (defn start-consumer
   [topic func]
   (let [consumer (create-consumer topic)]
@@ -133,11 +139,9 @@
         (try
           (consumer-protocols/subscribe-to-partitions! c [topic])
           (while true
-            (let [cr          (consumer-protocols/poll! c)
-                  msg-batches (partition-all 10 cr)]
-              (doseq [msg-batch msg-batches :when (seq msg-batch)]
-                (let [offsets (process-messages-with-offsets msg-batch func)]
-                  (consumer-protocols/commit-offsets-async! c offsets)))))
+            (doseq [msg (consumer-protocols/poll! c)]
+              (let [offset (process-messages-with-offset msg func)]
+                (consumer-protocols/commit-offsets-async! c offset))))
           (catch WakeupException we
             (consumer-protocols/commit-offsets-sync! c)
             (consumer-protocols/clear-subscriptions! c)))))
@@ -147,9 +151,15 @@
   [msg]
   (let [value               (:value msg)
         value-map           (cheshire-core/parse-string value true)
+        _                   (redis/set-inspectionid (:INSPECTION_ID value-map)) 
+        _                   (redis/set-spatial-data (:INSPECTION_ID value-map)
+                                                    (:LONGITUDE value-map)
+                                                    (:LATITUDE value-map))
         receipt-data        (tierion/submit-hashitem value)
         receipts-topic-data {:INSPECTION_ID (:INSPECTION_ID value-map)
-                             :receiptId     (:receiptId receipt-data)}]
+                             :receiptId     (:receiptId receipt-data)}
+        _                   (redis/set-receiptid (:INSPECTION_ID value-map)
+                                                 (:receiptId receipt-data))] 
     (log/info "Data that goes to receipt topic: " receipts-topic-data)
     (put "reciepts-topic" (cheshire-core/generate-string receipts-topic-data))))
 
@@ -160,11 +170,20 @@
   :stop
   (.close data-topic-consumer))
 
+(defn process-receipts
+  [msg]
+  (let [value          (:value msg)
+        value-map      (cheshire-core/parse-string value true)
+        proof-data     (tierion/retry-get-proof-indefinitely (:receiptId value-map) (:INSPECTION_ID value-map))
+        proof-data-str (cheshire-core/generate-string proof-data)]
+    (log/info "Data that goes to proof  topic: " proof-data-str)
+    (redis/set-proof (:INSPECTION_ID value-map) proof-data-str)
+    (put "proof-topic" proof-data-str )))
+
 (defstate reciepts-topic-consumer
   :start
   (start-consumer (conf/reciepts-topic-name)
-                  (fn [msg]
-                    (log/info "Processing Reciepts!!!" msg)))
+                  process-receipts)
   :stop
   (.close reciepts-topic-consumer))
 
