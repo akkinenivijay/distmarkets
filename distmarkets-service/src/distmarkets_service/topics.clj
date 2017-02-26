@@ -140,6 +140,7 @@
           (consumer-protocols/subscribe-to-partitions! c [topic])
           (while true
             (doseq [msg (consumer-protocols/poll! c)]
+              (Thread/sleep 1000)
               (let [offset (process-messages-with-offset msg func)]
                 (consumer-protocols/commit-offsets-async! c offset))))
           (catch WakeupException we
@@ -155,6 +156,7 @@
         _                   (redis/set-spatial-data (:INSPECTION_ID value-map)
                                                     (:LONGITUDE value-map)
                                                     (:LATITUDE value-map))
+        _                   (do @(future (Thread/sleep 3000)))
         receipt-data        (tierion/submit-hashitem value)
         receipts-topic-data {:INSPECTION_ID (:INSPECTION_ID value-map)
                              :receiptId     (:receiptId receipt-data)}

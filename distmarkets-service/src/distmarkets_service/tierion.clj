@@ -53,6 +53,7 @@
   [receiptid dataid]
   (let [respone (get-receipt receiptid)]
     (if (= (:status respone) :not-ready)
-      (do @(future (Thread/sleep 30000) (println "procesing receiptid & dataid: " receiptid dataid))
+      (do (Thread/sleep 10000)
+          (println "procesing receiptid & dataid: " receiptid dataid)
           (retry-get-proof-indefinitely receiptid dataid))
       {:INSPECTION_ID dataid :receiptId receiptid :final-proof (cheshire-core/parse-string (:receipt respone) true)})))
