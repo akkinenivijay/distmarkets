@@ -14,7 +14,25 @@
 
 (defn geo-query
   [ctx]
-  (redis/geo-radius-query))
+  (let [data        (redis/geo-radius-query)
+        resp        {:type     :FeatureCollection
+                     :features []}
+        featuredata (for [item data]
+                      (let [proof   (first item)
+                            long    (read-string (second item))
+                            lat     (read-string (nth item 2))
+                            feature {:type       :Feature
+                                     :geometry   {:type        :Point
+                                                  :coordinates [long lat]}
+                                     :properties {:marker-color  "#7e7e7e"
+                                                  :marker-size   "small"
+                                                  :marker-symbol ""
+                                                  :merkleroot    (get-in (first proof) [:final-proof :merkleRoot])
+                                                  :sourceId      (:sourceId  (first (get-in (first proof) [:final-proof :anchors])))
+                                                  :receiptId     (get-in (first proof) [:receiptId])
+                                                  :dataid        (get-in (first proof) [:INSPECTION_ID])}}]
+                        feature))]
+    (assoc-in resp [:features] featuredata)))
 
 (defn id-data
   [ctx]
